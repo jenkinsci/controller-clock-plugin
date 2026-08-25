@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+  Controller Clock is installed and running.
+</div>

@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>5.0</version>
+  </parent>
+
+  <groupId>io.jenkins.plugins</groupId>
+  <artifactId>controller-clock</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>hpi</packaging>
+
+  <name>Controller Clock</name>
+  <description>Displays the Jenkins controller time and timezone in the UI.</description>
+  <url>https://github.com/jenkinsci/controller-clock-plugin</url>
+
+  <properties>
+    <jenkins.version>2.479.3</jenkins.version>
+    <java.level>17</java.level>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/jenkinsci/controller-clock-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/jenkinsci/controller-clock-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/controller-clock-plugin</url>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>jenkins-public</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>jenkins-public</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

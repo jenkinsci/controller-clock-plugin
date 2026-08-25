@@ -1,0 +1,6 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <p>
+    Controller Clock is available on Jenkins pages through the global page decorator.
+  </p>
+</j:jelly>
