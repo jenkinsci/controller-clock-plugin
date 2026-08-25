@@ -5,8 +5,8 @@ import hudson.model.RootAction;
 import hudson.model.User;
 import hudson.model.UserProperty;
 import jenkins.model.Jenkins;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -55,7 +55,7 @@ public class ControllerClockRootAction implements RootAction {
         return null;
     }
 
-    public void doSync(StaplerRequest req, StaplerResponse rsp) throws IOException {
+    public void doSync(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
         Jenkins.get().checkPermission(Jenkins.READ);
         ControllerClockData data = getClockData();
         rsp.setContentType("application/json;charset=UTF-8");

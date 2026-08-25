@@ -3,28 +3,34 @@ package io.jenkins.plugins.controllerclock;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
 import hudson.security.AccessDeniedException3;
-import hudson.model.UserProperty;
 import hudson.model.User;
+import hudson.model.UserProperty;
 import jenkins.model.Jenkins;
 import org.htmlunit.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Method;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@WithJenkins
 public class ControllerClockRootActionTest {
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins;
+
+    @BeforeEach
+    void setUp(JenkinsRule rule) {
+        jenkins = rule;
+    }
 
     @Test
     public void syncEndpointReturnsControllerClockJsonAndCacheHeaders() throws Exception {
@@ -93,9 +99,7 @@ public class ControllerClockRootActionTest {
                 "alice",
                 AuthorityUtils.createAuthorityList("ROLE_AUTHENTICATED"));
         try (ACLContext ignored = ACL.as2(authentication)) {
-            Method method = ControllerClockRootAction.class.getDeclaredMethod("getClockData");
-            method.setAccessible(true);
-            ControllerClockData data = (ControllerClockData) method.invoke(action);
+            ControllerClockData data = getClockData(action);
             assertEquals("Europe/London", data.getDisplayTimeZoneId());
             assertTrue(data.isDisplayTimeZoneValid());
         }
@@ -109,5 +113,11 @@ public class ControllerClockRootActionTest {
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
         org.htmlunit.Page page = client.getPage(jenkins.getURL() + "controller-clock/clockData");
         assertEquals(404, page.getWebResponse().getStatusCode());
+    }
+
+    private static ControllerClockData getClockData(ControllerClockRootAction action) throws Exception {
+        Method method = ControllerClockRootAction.class.getDeclaredMethod("getClockData");
+        method.setAccessible(true);
+        return (ControllerClockData) method.invoke(action);
     }
 }

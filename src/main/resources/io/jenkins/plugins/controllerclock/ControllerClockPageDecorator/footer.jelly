@@ -2,21 +2,21 @@
 <j:jelly xmlns:j="jelly:core" xmlns:dd="/lib/layout/dropdowns">
   <div id="controller-clock-bootstrap"
        data-sync-url="${rootURL}/controller-clock/sync"
-       data-label-synchronizing="${%Synchronizing...}"
-       data-label-waiting="${%Waiting for controller time.}"
-       data-label-sync-current="${%Clock sync current}"
-       data-label-sync-stale="${%Clock sync stale}"
-       data-label-sync-unavailable="${%Clock sync unavailable}"
-       data-label-sync-waiting="${%Clock sync waiting}"
-       data-label-controller-zone="${%Controller zone}"
-       data-label-controller-offset="${%Controller UTC offset}"
-       data-label-browser-zone="${%Browser zone}"
-       data-label-browser-offset="${%Browser UTC offset}"
-       data-label-display-zone="${%Jelly display timezone override}"
-       data-label-no-display-zone="${%No display timezone override}"
-       data-label-invalid-display-zone="${%Invalid display timezone override}"
-       data-label-zone-mismatch="${%Time zone IDs differ}"
-       data-label-offset-mismatch="${%Current UTC offsets differ}"
+       data-label-synchronizing="${%synchronizing}"
+       data-label-waiting="${%waitingForControllerTime}"
+       data-label-sync-current="${%syncCurrent}"
+       data-label-sync-stale="${%syncStale}"
+       data-label-sync-unavailable="${%syncUnavailable}"
+       data-label-sync-waiting="${%syncWaiting}"
+       data-label-controller-zone="${%controllerZone}"
+       data-label-controller-offset="${%controllerUtcOffset}"
+       data-label-browser-zone="${%browserZone}"
+       data-label-browser-offset="${%browserUtcOffset}"
+       data-label-display-zone="${%jellyDisplayTimezoneOverride}"
+       data-label-no-display-zone="${%noDisplayTimezoneOverride}"
+       data-label-invalid-display-zone="${%invalidDisplayTimezoneOverride}"
+       data-label-zone-mismatch="${%timeZoneIdsDiffer}"
+       data-label-offset-mismatch="${%currentUtcOffsetsDiffer}"
        data-label-yes="${%yes}"
        data-label-no="${%no}"
        data-label-unknown="${%unknown}"
@@ -31,16 +31,16 @@
             aria-labelledby="controller-clock-accessible-label controller-clock-value">
       <span id="controller-clock-accessible-label" class="controller-clock-trigger__sr-only">${%Controller time}</span>
       <span class="controller-clock-trigger__icon" aria-hidden="true">🕒</span>
-      <span id="controller-clock-value" class="controller-clock-trigger__value">${%Synchronizing...}</span>
+      <span id="controller-clock-value" class="controller-clock-trigger__value">${%synchronizing}</span>
     </button>
     <template>
       <div class="jenkins-dropdown jenkins-dropdown--compact controller-clock-dropdown">
         <dd:custom>
           <div class="controller-clock-popup">
-            <div class="controller-clock-popup__title">${%Controller time}</div>
-            <div id="controller-clock-popup-time" class="controller-clock-popup__time">${%Synchronizing...}</div>
-            <div class="controller-clock-popup__label">${%Synchronization status}</div>
-            <div id="controller-clock-popup-status" class="controller-clock-popup__status">${%Waiting}</div>
+            <div class="controller-clock-popup__title">${%controllerTime}</div>
+            <div id="controller-clock-popup-time" class="controller-clock-popup__time">${%synchronizing}</div>
+            <div class="controller-clock-popup__label">${%synchronizationStatus}</div>
+            <div id="controller-clock-popup-status" class="controller-clock-popup__status">${%syncWaiting}</div>
           </div>
         </dd:custom>
       </div>
