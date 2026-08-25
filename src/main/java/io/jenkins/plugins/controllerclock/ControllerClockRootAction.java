@@ -30,7 +30,7 @@ public class ControllerClockRootAction implements RootAction {
         return "controller-clock";
     }
 
-    public ControllerClockData getClockData() {
+    private ControllerClockData getClockData() {
         Instant now = Instant.now();
         ZoneId zoneId = ZoneId.systemDefault();
         return ControllerClockData.from(now, zoneId, getCurrentUserDisplayTimeZoneName());

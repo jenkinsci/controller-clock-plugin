@@ -3,8 +3,8 @@ package io.jenkins.plugins.controllerclock;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
 import hudson.security.AccessDeniedException3;
-import hudson.model.User;
 import hudson.model.UserProperty;
+import hudson.model.User;
 import jenkins.model.Jenkins;
 import org.htmlunit.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
@@ -15,9 +15,12 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
 
 public class ControllerClockRootActionTest {
     @Rule
@@ -90,9 +93,21 @@ public class ControllerClockRootActionTest {
                 "alice",
                 AuthorityUtils.createAuthorityList("ROLE_AUTHENTICATED"));
         try (ACLContext ignored = ACL.as2(authentication)) {
-            ControllerClockData data = action.getClockData();
+            Method method = ControllerClockRootAction.class.getDeclaredMethod("getClockData");
+            method.setAccessible(true);
+            ControllerClockData data = (ControllerClockData) method.invoke(action);
             assertEquals("Europe/London", data.getDisplayTimeZoneId());
             assertTrue(data.isDisplayTimeZoneValid());
         }
+    }
+
+    @Test
+    public void clockDataHelperIsNotPubliclyExposed() throws Exception {
+        assertTrue(Modifier.isPrivate(ControllerClockRootAction.class.getDeclaredMethod("getClockData").getModifiers()));
+
+        WebClient client = jenkins.createWebClient();
+        client.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        org.htmlunit.Page page = client.getPage(jenkins.getURL() + "controller-clock/clockData");
+        assertEquals(404, page.getWebResponse().getStatusCode());
     }
 }
