@@ -1,5 +1,8 @@
 package io.jenkins.plugins.controllerclock;
 
+import net.sf.json.JSONNull;
+import net.sf.json.JSONObject;
+
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -77,37 +80,17 @@ final class ControllerClockData {
     }
 
     String toJson() {
-        StringBuilder json = new StringBuilder(192);
-        json.append('{')
-                .append("\"epochMillis\":").append(epochMillis)
-                .append(",\"controllerTimeZoneId\":").append(quote(controllerTimeZoneId))
-                .append(",\"controllerUtcOffsetMinutes\":").append(controllerUtcOffsetMinutes)
-                .append(",\"displayTimeZoneId\":").append(quote(displayTimeZoneId))
-                .append(",\"displayTimeZoneValid\":").append(displayTimeZoneValid);
-        json.append(",\"displayUtcOffsetMinutes\":");
-        if (displayUtcOffsetMinutes == null) {
-            json.append("null");
-        } else {
-            json.append(displayUtcOffsetMinutes);
-        }
-        json.append('}');
+        JSONObject json = new JSONObject();
+        json.put("epochMillis", epochMillis);
+        json.put("controllerTimeZoneId", controllerTimeZoneId);
+        json.put("controllerUtcOffsetMinutes", controllerUtcOffsetMinutes);
+        json.put("displayTimeZoneId", orJsonNull(displayTimeZoneId));
+        json.put("displayTimeZoneValid", displayTimeZoneValid);
+        json.put("displayUtcOffsetMinutes", orJsonNull(displayUtcOffsetMinutes));
         return json.toString();
     }
 
-    private static String quote(String value) {
-        if (value == null) {
-            return "null";
-        }
-        StringBuilder quoted = new StringBuilder(value.length() + 2);
-        quoted.append('"');
-        for (int i = 0; i < value.length(); i++) {
-            char ch = value.charAt(i);
-            if (ch == '\\' || ch == '"') {
-                quoted.append('\\');
-            }
-            quoted.append(ch);
-        }
-        quoted.append('"');
-        return quoted.toString();
+    private static Object orJsonNull(Object value) {
+        return value != null ? value : JSONNull.getInstance();
     }
 }

@@ -3,21 +3,25 @@ package io.jenkins.plugins.controllerclock;
 import hudson.Extension;
 import hudson.model.RootAction;
 import hudson.model.User;
-import hudson.model.UserProperty;
+import hudson.model.TimeZoneProperty;
 import jenkins.model.Jenkins;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.StaplerResponse2;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.ZoneId;
 
-@Extension
+@Extension(ordinal = 1000)
 public class ControllerClockRootAction implements RootAction {
     @Override
     public String getIconFileName() {
-        return null;
+        return "symbol-time-outline plugin-ionicons-api";
+    }
+
+    public boolean isPrimaryAction() {
+        return true;
     }
 
     @Override
@@ -30,29 +34,24 @@ public class ControllerClockRootAction implements RootAction {
         return "controller-clock";
     }
 
+    public void doIndex(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
+        rsp.sendError(404);
+    }
+
     private ControllerClockData getClockData() {
         Instant now = Instant.now();
         ZoneId zoneId = ZoneId.systemDefault();
         return ControllerClockData.from(now, zoneId, getCurrentUserDisplayTimeZoneName());
     }
 
+    @SuppressRestrictedWarnings(TimeZoneProperty.class)
     private String getCurrentUserDisplayTimeZoneName() {
         User currentUser = User.current();
         if (currentUser == null) {
             return null;
         }
-        for (UserProperty property : currentUser.getAllProperties()) {
-            if ("hudson.model.TimeZoneProperty".equals(property.getClass().getName())) {
-                try {
-                    Method method = property.getClass().getMethod("getTimeZoneName");
-                    Object value = method.invoke(property);
-                    return value instanceof String ? (String) value : null;
-                } catch (ReflectiveOperationException ignored) {
-                    return null;
-                }
-            }
-        }
-        return null;
+        TimeZoneProperty timeZoneProperty = currentUser.getProperty(TimeZoneProperty.class);
+        return timeZoneProperty != null ? timeZoneProperty.getTimeZoneName() : null;
     }
 
     public void doSync(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {

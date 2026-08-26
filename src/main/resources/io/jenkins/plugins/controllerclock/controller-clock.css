@@ -1,0 +1,16 @@
+#controller-clock {
+  position: relative;
+  display: inline-block;
+}
+
+#controller-clock-global {
+  margin: 0.375rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+#controller-clock-global .controller-clock-global__value {
+  font-variant-numeric: tabular-nums;
+}

@@ -28,7 +28,6 @@
     <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     <ban-deprecated-stapler.skip>false</ban-deprecated-stapler.skip>
     <ban-commons-lang-2.skip>false</ban-commons-lang-2.skip>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencyManagement>
@@ -73,14 +72,10 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>jenkins-core</artifactId>
+      <groupId>org.kohsuke</groupId>
+      <artifactId>access-modifier-suppressions</artifactId>
+      <version>${access-modifier-checker.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

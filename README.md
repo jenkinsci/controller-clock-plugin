@@ -1,6 +1,6 @@
 # Controller Clock
 
-Jenkins plugin that displays the controller time and timezone in the Jenkins UI and highlights differences from the user’s browser timezone.
+Jenkins plugin that adds a controller clock to the global header. It stays synced to the Jenkins controller, not the browser's local clock.
 
 ## Privacy and network behavior
 

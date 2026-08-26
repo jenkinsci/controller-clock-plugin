@@ -1,0 +1,19 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
+  <st:adjunct includes="io.jenkins.plugins.controllerclock.controller-clock"/>
+
+  <div id="controller-clock"
+       class="controller-clock-widget"
+       data-sync-url="${rootURL}/controller-clock/sync"
+       data-label-synchronizing="${%synchronizing}"
+       data-label-unknown="${%unknown}">
+    <button
+        id="controller-clock-global"
+        class="jenkins-button jenkins-button--tertiary controller-clock-global"
+        type="button"
+        aria-label="${%controllerTime}">
+      <l:icon src="symbol-time-outline plugin-ionicons-api" />
+      <span id="controller-clock-global-value" class="controller-clock-global__value jenkins-mobile-hide">${%synchronizing}</span>
+    </button>
+  </div>
+</j:jelly>

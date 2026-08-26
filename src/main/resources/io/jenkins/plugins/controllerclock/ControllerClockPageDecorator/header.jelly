@@ -1,5 +1,0 @@
-<?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core">
-  <link rel="stylesheet" href="${rootURL}/plugin/controller-clock/controller-clock.css"/>
-  <script src="${rootURL}/plugin/controller-clock/controller-clock.js" defer="defer"></script>
-</j:jelly>

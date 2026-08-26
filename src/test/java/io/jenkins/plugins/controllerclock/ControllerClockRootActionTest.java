@@ -4,20 +4,25 @@ import hudson.security.ACL;
 import hudson.security.ACLContext;
 import hudson.security.AccessDeniedException3;
 import hudson.model.User;
-import hudson.model.UserProperty;
+import hudson.model.TimeZoneProperty;
 import jenkins.model.Jenkins;
 import org.htmlunit.WebClient;
+import org.htmlunit.MockWebConnection;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,26 +52,76 @@ public class ControllerClockRootActionTest {
     }
 
     @Test
-    public void globalDecoratorInjectsClockAssetsAndBootstrap() throws Exception {
+    public void globalHeaderInjectsClockChipAndBootstrap() throws Exception {
         WebClient client = jenkins.createWebClient();
         client.getOptions().setJavaScriptEnabled(false);
         client.getOptions().setCssEnabled(false);
         String body = client.getPage(jenkins.getURL()).getWebResponse().getContentAsString();
-        assertTrue(body.contains("controller-clock.css"));
-        assertTrue(body.contains("controller-clock.js"));
-        assertTrue(body.contains("controller-clock-bootstrap"));
-        assertTrue(body.contains("controller-clock-trigger"));
-        assertTrue(body.contains("controller-clock-popup-time"));
+        int headEnd = body.indexOf("</head>");
+        assertTrue(body.contains("controller-clock-global"));
+        assertTrue(body.contains("controller-clock-global-value"));
+        assertTrue(headEnd >= 0);
+        assertTrue(body.indexOf("controller-clock-global") > headEnd);
+        assertTrue(body.contains("aria-label=\"Controller time\""));
         assertTrue(body.contains("data-sync-url"));
+        assertTrue(!body.contains("controller-clock-global-popup"));
+        assertTrue(!body.contains("aria-haspopup=\"dialog\""));
+        assertTrue(!body.contains("aria-expanded=\"false\""));
+        assertTrue(!body.contains("aria-controls=\"controller-clock-global-popup\""));
+        String button = body.substring(body.indexOf("controller-clock-global"), body.indexOf("controller-clock-global-value"));
+        assertTrue(button.contains("<svg"));
+        assertTrue(button.contains("aria-hidden=\"true\""));
+        assertTrue(!body.contains("dd:custom"));
+    }
 
-        assertTrue(client.getPage(jenkins.getURL() + "plugin/controller-clock/controller-clock.css")
-                .getWebResponse()
-                .getContentAsString()
-                .contains("#controller-clock"));
-        assertTrue(client.getPage(jenkins.getURL() + "plugin/controller-clock/controller-clock.js")
-                .getWebResponse()
-                .getContentAsString()
-                .contains("controller-clock-trigger"));
+    @Test
+    public void pluginAssetsAreServedAndClockRendersInBrowser() throws Exception {
+        WebClient client = jenkins.createWebClient();
+        client.getOptions().setJavaScriptEnabled(true);
+        org.htmlunit.html.HtmlPage page = client.getPage(jenkins.getURL());
+        client.waitForBackgroundJavaScript(5000);
+        assertTrue(page.asNormalizedText().contains("REST API"));
+        assertTrue(page.getElementById("controller-clock") != null);
+        assertEquals(1, page.querySelectorAll("#controller-clock").size());
+    }
+
+    @Test
+    public void scriptDoesNothingWhenClockAnchorIsMissing() throws Exception {
+        URL pageUrl = new URL("http://example.test/");
+        URL scriptUrl = new URL("http://example.test/controller-clock.js");
+        MockWebConnection connection = new MockWebConnection();
+        connection.setResponse(pageUrl, """
+                <!doctype html>
+                <html>
+                  <head>
+                    <script src="/controller-clock.js"></script>
+                  </head>
+                  <body>
+                    <p>plain page</p>
+                  </body>
+                </html>
+                """, "text/html");
+        connection.setResponse(scriptUrl, readResource("/io/jenkins/plugins/controllerclock/controller-clock.js"), "application/javascript");
+
+        WebClient client = new WebClient();
+        client.setWebConnection(connection);
+        client.getOptions().setJavaScriptEnabled(true);
+        client.getOptions().setCssEnabled(false);
+        org.htmlunit.html.HtmlPage page = client.getPage(pageUrl);
+        client.waitForBackgroundJavaScript(1000);
+        assertTrue(page.asNormalizedText().contains("plain page"));
+        assertEquals(2, connection.getRequestCount());
+        assertTrue(page.getElementById("controller-clock") == null);
+    }
+
+    @Test
+    public void dedicatedClockPageIsNotExposedAnymore() throws Exception {
+        WebClient client = jenkins.createWebClient();
+        client.getOptions().setJavaScriptEnabled(false);
+        client.getOptions().setCssEnabled(false);
+        client.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        org.htmlunit.Page page = client.getPage(jenkins.getURL() + "controller-clock/");
+        assertEquals(404, page.getWebResponse().getStatusCode());
     }
 
     @Test
@@ -85,14 +140,12 @@ public class ControllerClockRootActionTest {
     }
 
     @Test
+    @SuppressRestrictedWarnings(TimeZoneProperty.class)
     public void currentUserTimezoneOverrideIsCaptured() throws Exception {
         jenkins.jenkins.setSecurityRealm(jenkins.createDummySecurityRealm());
         jenkins.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy().grant(Jenkins.READ).everywhere().to("alice"));
         User alice = User.getById("alice", true);
-        UserProperty timeZoneProperty = (UserProperty) Class.forName("hudson.model.TimeZoneProperty")
-                .getConstructor(String.class)
-                .newInstance("Europe/London");
-        alice.addProperty(timeZoneProperty);
+        alice.addProperty(new TimeZoneProperty("Asia/Kolkata"));
         ControllerClockRootAction action = new ControllerClockRootAction();
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 "alice",
@@ -100,8 +153,9 @@ public class ControllerClockRootActionTest {
                 AuthorityUtils.createAuthorityList("ROLE_AUTHENTICATED"));
         try (ACLContext ignored = ACL.as2(authentication)) {
             ControllerClockData data = getClockData(action);
-            assertEquals("Europe/London", data.getDisplayTimeZoneId());
+            assertEquals("Asia/Kolkata", data.getDisplayTimeZoneId());
             assertTrue(data.isDisplayTimeZoneValid());
+            assertEquals(Integer.valueOf(330), data.getDisplayUtcOffsetMinutes());
         }
     }
 
@@ -119,5 +173,14 @@ public class ControllerClockRootActionTest {
         Method method = ControllerClockRootAction.class.getDeclaredMethod("getClockData");
         method.setAccessible(true);
         return (ControllerClockData) method.invoke(action);
+    }
+
+    private static String readResource(String path) throws Exception {
+        try (InputStream in = ControllerClockRootActionTest.class.getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IllegalStateException("Missing test resource: " + path);
+            }
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 }

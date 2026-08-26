@@ -1,9 +1,11 @@
 # Architecture
 
-Controller Clock has three pieces:
+Controller Clock has three parts:
 
-1. `ControllerClockRootAction` exposes the read-only `/controller-clock/sync` endpoint and the standalone `/controller-clock/` page.
-2. `ControllerClockPageDecorator` injects the clock assets and bootstrap data into normal Jenkins pages.
-3. `controller-clock.js` synchronizes against the controller, advances locally with `performance.now()`, and renders the banner.
+1. `ControllerClockRootAction` is the `@Extension` `RootAction` that puts the clock in the Jenkins global header and serves the read-only `/controller-clock/sync` endpoint.
+2. `ControllerClockRootAction/action.jelly` renders the clock chip in the header and loads `controller-clock.css` and `controller-clock.js` with `st:adjunct`.
+3. `controller-clock.js` syncs against the controller, advances locally with `performance.now()`, and redraws the chip once a second.
 
-The controller remains authoritative for the displayed instant. The browser only estimates time progression between resyncs. Timezone details come from the controller JVM, the current user’s Jenkins timezone override, and the browser’s own timezone APIs.
+The controller is the source of truth for the displayed time. Between syncs, the browser estimates progress by storing `payload.epochMillis + roundTripMs / 2` together with a `performance.now()` reading, so changes to the user's clock do not affect the display. The widget exposes its sync state through `data-sync-state` (`waiting`, `current`, `stale`, `unavailable`); anything other than `current` uses the secondary text color.
+
+Timezone details come from the controller JVM and, if present, the current user's Jenkins timezone override.

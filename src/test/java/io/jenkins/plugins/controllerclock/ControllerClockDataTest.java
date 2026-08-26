@@ -37,6 +37,18 @@ public class ControllerClockDataTest {
     }
 
     @Test
+    public void serializesExplicitNullsWhenNoDisplayTimeZoneIsSet() {
+        ControllerClockData data = ControllerClockData.from(
+                Instant.parse("2026-08-24T12:00:00Z"),
+                ZoneId.of("Asia/Kolkata"),
+                null);
+        String json = data.toJson();
+        assertTrue(json.contains("\"displayTimeZoneId\":null"));
+        assertTrue(json.contains("\"displayTimeZoneValid\":false"));
+        assertTrue(json.contains("\"displayUtcOffsetMinutes\":null"));
+    }
+
+    @Test
     public void usesTimezoneDatabaseForDstTransitions() {
         ControllerClockData before = ControllerClockData.from(
                 Instant.parse("2026-03-08T06:59:59Z"),
