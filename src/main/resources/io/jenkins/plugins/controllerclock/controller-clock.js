@@ -1,4 +1,5 @@
 (function () {
+  const GLOBAL_CONTROL_ID = 'controller-clock-global';
   const GLOBAL_VALUE_ID = 'controller-clock-global-value';
   const WIDGET_ID = 'controller-clock';
   const RESYNC_INTERVAL_MS = 5 * 60 * 1000;
@@ -7,6 +8,7 @@
   function labelsFromWidget(widget) {
     const dataset = widget.dataset || {};
     return {
+      controllerTime: dataset.labelControllerTime || 'Controller time',
       synchronizing: dataset.labelSynchronizing || 'Synchronizing...',
       unknown: dataset.labelUnknown || 'unknown',
     };
@@ -21,6 +23,7 @@
 
     return {
       labels: labelsFromWidget(widget),
+      globalControl: null,
       globalValue: null,
       widget: widget,
       controllerSyncUrl: widget.getAttribute('data-sync-url') || '',
@@ -37,8 +40,26 @@
 
   function resolveWidgetParts(state) {
     const widget = state.widget;
+    state.globalControl = widget.querySelector('#' + GLOBAL_CONTROL_ID);
     state.globalValue = widget.querySelector('#' + GLOBAL_VALUE_ID);
-    return Boolean(state.globalValue);
+    return Boolean(state.globalControl && state.globalValue);
+  }
+
+  function controllerButtonLabel(state, controllerNow, controllerZoneId) {
+    if (controllerNow == null) {
+      return state.labels.controllerTime + ': ' + state.labels.synchronizing;
+    }
+
+    const zoneSuffix = controllerZoneId && controllerZoneId !== state.labels.unknown
+      ? ' (' + controllerZoneId + ')'
+      : '';
+    return state.labels.controllerTime + ': ' + formatControllerTime(controllerNow, controllerZoneId) + zoneSuffix;
+  }
+
+  function updateControlMetadata(state, controllerNow, controllerZoneId) {
+    const label = controllerButtonLabel(state, controllerNow, controllerZoneId);
+    state.globalControl.setAttribute('title', label);
+    state.globalControl.setAttribute('aria-label', label);
   }
 
   function currentControllerNow(state) {
@@ -87,6 +108,7 @@
     const timeText = controllerNow == null ? state.labels.synchronizing : formatControllerTime(controllerNow, controllerZoneId);
 
     state.globalValue.textContent = timeText;
+    updateControlMetadata(state, controllerNow, controllerZoneId);
 
     if (state.widget) {
       state.widget.setAttribute('data-sync-state', effectiveSyncState(state));

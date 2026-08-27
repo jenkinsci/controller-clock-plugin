@@ -63,14 +63,19 @@ public class ControllerClockRootActionTest {
         assertTrue(headEnd >= 0);
         assertTrue(body.indexOf("controller-clock-global") > headEnd);
         assertTrue(body.contains("aria-label=\"Controller time\""));
+        assertTrue(body.contains("title=\"Controller time\""));
+        assertTrue(body.contains("data-label-controller-time=\"Controller time\""));
         assertTrue(body.contains("data-sync-url"));
         assertTrue(!body.contains("controller-clock-global-popup"));
         assertTrue(!body.contains("aria-haspopup=\"dialog\""));
         assertTrue(!body.contains("aria-expanded=\"false\""));
         assertTrue(!body.contains("aria-controls=\"controller-clock-global-popup\""));
-        String button = body.substring(body.indexOf("controller-clock-global"), body.indexOf("controller-clock-global-value"));
-        assertTrue(button.contains("<svg"));
-        assertTrue(button.contains("aria-hidden=\"true\""));
+        assertTrue(body.contains("<span id=\"controller-clock-global\""));
+        assertTrue(!body.contains("<button id=\"controller-clock-global\""));
+        assertTrue(body.contains("controller-clock-global__value jenkins-mobile-hide"));
+        assertTrue(body.contains("role=\"timer\""));
+        assertTrue(body.contains("<svg"));
+        assertTrue(body.contains("aria-hidden=\"true\""));
         assertTrue(!body.contains("dd:custom"));
     }
 
@@ -79,10 +84,15 @@ public class ControllerClockRootActionTest {
         WebClient client = jenkins.createWebClient();
         client.getOptions().setJavaScriptEnabled(true);
         org.htmlunit.html.HtmlPage page = client.getPage(jenkins.getURL());
+        String initialTitle = page.getElementById("controller-clock-global").getAttribute("title");
         client.waitForBackgroundJavaScript(5000);
+        String title = page.getElementById("controller-clock-global").getAttribute("title");
         assertTrue(page.asNormalizedText().contains("REST API"));
         assertTrue(page.getElementById("controller-clock") != null);
         assertEquals(1, page.querySelectorAll("#controller-clock").size());
+        assertEquals("Controller time", initialTitle);
+        assertTrue(title.startsWith("Controller time: "));
+        assertTrue(page.getElementById("controller-clock-global").getAttribute("aria-label").startsWith("Controller time: "));
     }
 
     @Test

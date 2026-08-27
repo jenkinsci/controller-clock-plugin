@@ -5,15 +5,16 @@
   <div id="controller-clock"
        class="controller-clock-widget"
        data-sync-url="${rootURL}/controller-clock/sync"
+       data-label-controller-time="${%controllerTime}"
        data-label-synchronizing="${%synchronizing}"
        data-label-unknown="${%unknown}">
-    <button
+    <span
         id="controller-clock-global"
-        class="jenkins-button jenkins-button--tertiary controller-clock-global"
-        type="button"
+        class="controller-clock-global"
+        title="${%controllerTime}"
         aria-label="${%controllerTime}">
       <l:icon src="symbol-time-outline plugin-ionicons-api" />
-      <span id="controller-clock-global-value" class="controller-clock-global__value jenkins-mobile-hide">${%synchronizing}</span>
-    </button>
+      <span id="controller-clock-global-value" class="controller-clock-global__value jenkins-mobile-hide" role="timer">${%synchronizing}</span>
+    </span>
   </div>
 </j:jelly>
