@@ -8,10 +8,13 @@
        data-label-controller-time="${%controllerTime}"
        data-label-synchronizing="${%synchronizing}"
        data-label-unknown="${%unknown}">
+    <j:set var="tooltip">
+      <span id="controller-clock-tooltip">${%controllerTime}</span>
+    </j:set>
     <span
         id="controller-clock-global"
         class="controller-clock-global"
-        title="${%controllerTime}"
+        data-html-tooltip="${tooltip}"
         aria-label="${%controllerTime}">
       <l:icon src="symbol-time-outline plugin-ionicons-api" />
       <span id="controller-clock-global-value" class="controller-clock-global__value jenkins-mobile-hide" role="timer">${%synchronizing}</span>

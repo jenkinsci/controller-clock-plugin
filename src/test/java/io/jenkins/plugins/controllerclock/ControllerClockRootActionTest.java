@@ -63,14 +63,15 @@ public class ControllerClockRootActionTest {
         assertTrue(headEnd >= 0);
         assertTrue(body.indexOf("controller-clock-global") > headEnd);
         assertTrue(body.contains("aria-label=\"Controller time\""));
-        assertTrue(body.contains("title=\"Controller time\""));
+        assertTrue(body.contains("data-html-tooltip"));
+        assertTrue(body.contains("controller-clock-tooltip"));
         assertTrue(body.contains("data-label-controller-time=\"Controller time\""));
         assertTrue(body.contains("data-sync-url"));
         assertTrue(!body.contains("controller-clock-global-popup"));
         assertTrue(!body.contains("aria-haspopup=\"dialog\""));
         assertTrue(!body.contains("aria-expanded=\"false\""));
         assertTrue(!body.contains("aria-controls=\"controller-clock-global-popup\""));
-        assertTrue(body.contains("<span id=\"controller-clock-global\""));
+        assertTrue(body.contains("id=\"controller-clock-global\""));
         assertTrue(!body.contains("<button id=\"controller-clock-global\""));
         assertTrue(body.contains("controller-clock-global__value jenkins-mobile-hide"));
         assertTrue(body.contains("role=\"timer\""));
@@ -84,14 +85,10 @@ public class ControllerClockRootActionTest {
         WebClient client = jenkins.createWebClient();
         client.getOptions().setJavaScriptEnabled(true);
         org.htmlunit.html.HtmlPage page = client.getPage(jenkins.getURL());
-        String initialTitle = page.getElementById("controller-clock-global").getAttribute("title");
         client.waitForBackgroundJavaScript(5000);
-        String title = page.getElementById("controller-clock-global").getAttribute("title");
         assertTrue(page.asNormalizedText().contains("REST API"));
         assertTrue(page.getElementById("controller-clock") != null);
         assertEquals(1, page.querySelectorAll("#controller-clock").size());
-        assertEquals("Controller time", initialTitle);
-        assertTrue(title.startsWith("Controller time: "));
         assertTrue(page.getElementById("controller-clock-global").getAttribute("aria-label").startsWith("Controller time: "));
     }
 
@@ -122,6 +119,78 @@ public class ControllerClockRootActionTest {
         assertTrue(page.asNormalizedText().contains("plain page"));
         assertEquals(2, connection.getRequestCount());
         assertTrue(page.getElementById("controller-clock") == null);
+    }
+
+    @Test
+    public void tooltipContentIsSyncedThroughTippy() throws Exception {
+        URL pageUrl = new URL("http://example.test/");
+        URL scriptUrl = new URL("http://example.test/controller-clock.js");
+        URL syncUrl = new URL("http://example.test/controller-clock/sync");
+        MockWebConnection connection = new MockWebConnection();
+        connection.setResponse(pageUrl, """
+                <!doctype html>
+                <html>
+                  <head>
+                    <script>
+                      function recordTooltip(content) {
+                        var state = document.getElementById('tooltip-state');
+                        state.setAttribute('data-tooltip-tag', content.tagName);
+                        state.setAttribute('data-tooltip-id', content.id);
+                        state.setAttribute('data-tooltip-text', content.textContent);
+                      }
+                    </script>
+                    <script src="/controller-clock.js"></script>
+                  </head>
+                  <body>
+                    <div id="controller-clock"
+                         class="controller-clock-widget"
+                         data-sync-url="/controller-clock/sync"
+                         data-label-controller-time="Controller time"
+                         data-label-synchronizing="Synchronizing..."
+                         data-label-unknown="unknown">
+                      <span id="controller-clock-global"
+                            class="controller-clock-global"
+                            data-html-tooltip="<span id=&quot;controller-clock-tooltip&quot;>Controller time</span>"
+                            aria-label="Controller time">
+                        <span id="controller-clock-global-value" class="controller-clock-global__value jenkins-mobile-hide" role="timer">Synchronizing...</span>
+                      </span>
+                    </div>
+                    <div id="tooltip-state"></div>
+                    <script>
+                      document.getElementById('controller-clock-global')._tippy = {
+                        setContent: function (content) {
+                          recordTooltip(content);
+                        }
+                      };
+                    </script>
+                  </body>
+                </html>
+                """, "text/html");
+        connection.setResponse(scriptUrl, readResource("/io/jenkins/plugins/controllerclock/controller-clock.js"), "application/javascript");
+        connection.setResponse(syncUrl, """
+                {
+                  "epochMillis": 1756400000000,
+                  "controllerTimeZoneId": "Asia/Kolkata",
+                  "controllerUtcOffsetMinutes": 330,
+                  "displayTimeZoneId": "Asia/Kolkata",
+                  "displayTimeZoneValid": true,
+                  "displayUtcOffsetMinutes": 330
+                }
+                """, "application/json");
+
+        WebClient client = new WebClient();
+        client.setWebConnection(connection);
+        client.getOptions().setJavaScriptEnabled(true);
+        client.getOptions().setCssEnabled(false);
+        org.htmlunit.html.HtmlPage page = client.getPage(pageUrl);
+        client.waitForBackgroundJavaScript(5000);
+
+        org.htmlunit.html.DomElement tooltipState = page.getElementById("tooltip-state");
+        assertTrue(page.getElementById("controller-clock-global").getAttribute("data-html-tooltip").contains("Controller time: "));
+        assertEquals("span", tooltipState.getAttribute("data-tooltip-tag").toLowerCase());
+        assertEquals("controller-clock-tooltip", tooltipState.getAttribute("data-tooltip-id"));
+        assertTrue(tooltipState.getAttribute("data-tooltip-text").startsWith("Controller time: "));
+        assertTrue(page.getElementById("controller-clock-global").getAttribute("aria-label").startsWith("Controller time: "));
     }
 
     @Test
