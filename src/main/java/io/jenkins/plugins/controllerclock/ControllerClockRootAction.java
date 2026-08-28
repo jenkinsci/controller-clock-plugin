@@ -8,6 +8,7 @@ import jenkins.model.Jenkins;
 import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.StaplerResponse2;
+import org.kohsuke.stapler.verb.GET;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -34,10 +35,6 @@ public class ControllerClockRootAction implements RootAction {
         return "controller-clock";
     }
 
-    public void doIndex(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
-        rsp.sendError(404);
-    }
-
     private ControllerClockData getClockData() {
         Instant now = Instant.now();
         ZoneId zoneId = ZoneId.systemDefault();
@@ -54,6 +51,7 @@ public class ControllerClockRootAction implements RootAction {
         return timeZoneProperty != null ? timeZoneProperty.getTimeZoneName() : null;
     }
 
+    @GET
     public void doSync(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
         Jenkins.get().checkPermission(Jenkins.READ);
         ControllerClockData data = getClockData();
