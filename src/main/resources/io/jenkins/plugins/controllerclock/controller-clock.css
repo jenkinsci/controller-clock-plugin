@@ -17,6 +17,7 @@
   height: 1.25rem;
 }
 
-#controller-clock-global .controller-clock-global__value {
+#controller-clock-global .controller-clock-global__value,
+#controller-clock-tooltip {
   font-variant-numeric: tabular-nums;
 }

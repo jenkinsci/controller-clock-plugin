@@ -8,8 +8,11 @@
        data-label-controller-time="${%controllerTime}"
        data-label-synchronizing="${%synchronizing}"
        data-label-unknown="${%unknown}">
+    <j:invokeStatic var="initialTooltipTime"
+        className="io.jenkins.plugins.controllerclock.ControllerClockRootAction"
+        method="initialTooltipTime"/>
     <j:set var="tooltip">
-      <span id="controller-clock-tooltip">${%controllerTime}</span>
+      <span id="controller-clock-tooltip">${%controllerTime}: ${initialTooltipTime}</span>
     </j:set>
     <span
         id="controller-clock-global"

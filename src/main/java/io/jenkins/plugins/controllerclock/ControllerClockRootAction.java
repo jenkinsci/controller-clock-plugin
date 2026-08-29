@@ -13,9 +13,15 @@ import org.kohsuke.stapler.verb.GET;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Extension(ordinal = 1000)
 public class ControllerClockRootAction implements RootAction {
+    private static final DateTimeFormatter TOOLTIP_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("dd MMM uuuu, HH:mm:ss", Locale.ENGLISH);
+
     @Override
     public String getIconFileName() {
         return "symbol-time-outline plugin-ionicons-api";
@@ -33,6 +39,11 @@ public class ControllerClockRootAction implements RootAction {
     @Override
     public String getUrlName() {
         return "controller-clock";
+    }
+
+    public static String initialTooltipTime() {
+        ZoneId zoneId = ZoneId.systemDefault();
+        return ZonedDateTime.now(zoneId).format(TOOLTIP_TIME_FORMATTER) + " (" + zoneId.getId() + ")";
     }
 
     private ControllerClockData getClockData() {

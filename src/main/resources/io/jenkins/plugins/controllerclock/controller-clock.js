@@ -2,6 +2,7 @@
   const GLOBAL_CONTROL_ID = 'controller-clock-global';
   const GLOBAL_VALUE_ID = 'controller-clock-global-value';
   const WIDGET_ID = 'controller-clock';
+  const TOOLTIP_ID = 'controller-clock-tooltip';
   const RESYNC_INTERVAL_MS = 5 * 60 * 1000;
   const STALE_AFTER_MS = 10 * 60 * 1000;
 
@@ -45,17 +46,6 @@
     return Boolean(state.globalControl && state.globalValue);
   }
 
-  function createTooltipContent(label) {
-    const tooltip = document.createElement('span');
-    tooltip.id = 'controller-clock-tooltip';
-    tooltip.textContent = label;
-    return tooltip;
-  }
-
-  function createTooltipHtml(label) {
-    return createTooltipContent(label).outerHTML;
-  }
-
   function controllerButtonLabel(state, controllerNow, controllerZoneId) {
     if (controllerNow == null) {
       return state.labels.controllerTime + ': ' + state.labels.synchronizing;
@@ -67,21 +57,16 @@
     return state.labels.controllerTime + ': ' + formatControllerTime(controllerNow, controllerZoneId) + zoneSuffix;
   }
 
-  function syncTooltipContent(state, label) {
-    if (!state.globalControl) {
-      return;
-    }
-
-    state.globalControl.setAttribute('data-html-tooltip', createTooltipHtml(label));
-
-    if (state.globalControl._tippy) {
-      state.globalControl._tippy.setContent(createTooltipContent(label));
+  function syncTooltipContent(label) {
+    const tooltip = document.getElementById(TOOLTIP_ID);
+    if (tooltip != null) {
+      tooltip.textContent = label;
     }
   }
 
   function updateControlMetadata(state, controllerNow, controllerZoneId) {
     const label = controllerButtonLabel(state, controllerNow, controllerZoneId);
-    syncTooltipContent(state, label);
+    syncTooltipContent(label);
     state.globalControl.setAttribute('aria-label', label);
   }
 
