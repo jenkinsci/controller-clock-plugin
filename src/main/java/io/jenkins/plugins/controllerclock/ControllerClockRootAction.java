@@ -62,6 +62,7 @@ public class ControllerClockRootAction implements RootAction {
         return timeZoneProperty != null ? timeZoneProperty.getTimeZoneName() : null;
     }
 
+    @SuppressWarnings("lgtm[jenkins/csrf]")
     @GET
     public void doSync(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
         Jenkins.get().checkPermission(Jenkins.READ);
