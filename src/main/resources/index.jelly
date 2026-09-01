@@ -1,4 +1,36 @@
 <?jelly escape-by-default='true'?>
 <div>
-  Controller Clock is installed and running.
+  <p>
+    Controller Clock shows the Jenkins controller time in the global header.
+  </p>
+  <p>
+    The display is synced from Jenkins, so it reflects controller time rather than the browser clock.
+  </p>
+
+  <h2>Features</h2>
+  <ul>
+    <li>Displays controller time in the Jenkins header</li>
+    <li>Updates from Jenkins on a refresh interval</li>
+    <li>Uses controller time, not browser time</li>
+    <li>Shows the active Jenkins timezone in the tooltip</li>
+    <li>No plugin-specific configuration</li>
+    <li>No telemetry or outbound requests</li>
+  </ul>
+
+  <h2>Requirements</h2>
+  <ul>
+    <li>Jenkins 2.541.3 or newer</li>
+  </ul>
+
+  <h2>Usage</h2>
+  <p>
+    Once installed, the clock is visible in the Jenkins header.
+    Hover over it to see the full time and the timezone Jenkins is using.
+  </p>
+
+  <h2>Privacy and Network Behavior</h2>
+  <p>
+    Controller Clock is a local Jenkins feature. It does not send telemetry, analytics, or other outbound Internet traffic.
+    The browser only calls the Jenkins controller on the same origin to sync clock state.
+  </p>
 </div>
