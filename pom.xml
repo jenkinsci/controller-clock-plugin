@@ -16,7 +16,7 @@
 
   <name>Controller Clock</name>
   <description>Displays the Jenkins controller time and timezone in the UI.</description>
-  <url>https://github.com/jenkinsci/controller-clock-plugin</url>
+  <url>https://github.com/jenkinsci/controller-clock-plugin/tree/main</url>
 
   <properties>
     <revision>0.1</revision>
